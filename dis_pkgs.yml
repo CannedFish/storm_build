@@ -1,0 +1,42 @@
+# e.g. ansible-playbook dis_pkgs.yml -e "target_hosts=zookeeper pkg_path=/home/ubuntu/zookeeper.tar.gz pkg_name=zookeeper"
+---
+- name: distribute packages
+  hosts: "{{ target_hosts }}"
+  user: ubuntu
+  vars:
+    target_path: "/home/ubuntu/{{ pkg_name }}"
+  tasks:
+    - debug:
+        msg: "target path: {{ target_path }}"
+        
+    # check path exists first
+    - name: check whether exists the target path
+      shell: if [ -d "{{ target_path }}" ]; then echo 0; else echo 1; fi
+      register: ex_ret
+      ignore_errors: True
+    
+    - debug:
+        msg: "rc: {{ ex_ret.rc }}, stdout: {{ ex_ret.stdout }}, condition: {{ ex_ret.stdout == '1' }}"
+      
+    - name: make target directory
+      shell: mkdir "{{ target_path }}"
+      when: ex_ret.stdout == "1"
+    
+    - name: get real name of package
+      delegate_to: localhost
+      register: real_pkg_name
+      shell: echo "{{ pkg_path }}" | rev | cut -d '/' -f 1 | rev
+    
+    - debug:
+        msg: "pkg_name: {{ target_path }}/{{ real_pkg_name.stdout }}"
+      
+    - name: check whether exists this package
+      shell: if [ -f "{{ target_path }}/{{ real_pkg_name.stdout }}" ]; then echo 0; else echo 1; fi
+      register: ex_pkg
+    
+    - debug:
+        msg: "condition: {{ ex_pkg.stdout == '1' }}"
+    
+    - name: distribute the package to target directory
+      copy: src="{{ pkg_path }}" dest="{{ target_path }}"
+      when: ex_pkg.stdout == "1"

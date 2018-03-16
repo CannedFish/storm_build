@@ -1,0 +1,33 @@
+# e.g. ansible-playbook zookeeper_start.yml -e "pkg_version=3.4.5 cfg=/home/ubuntu/zoo.cfg"
+---
+- name: install zookeeper
+  hosts: zookeeper
+  user: ubuntu
+  vars:
+    pkg_path: "/home/ubuntu/zookeeper/zookeeper-{{ pkg_version }}.tar.gz"
+    unpacked_pkg_path: "/home/ubuntu/zookeeper/zookeeper-{{ pkg_version }}"
+    zkDataDir: "/var/lib/zookeeper"
+  tasks:
+    - name: unpack package
+      unarchive:
+        src: "{{ pkg_path }}"
+        dest: "/home/ubuntu/zookeeper"
+        remote_src: yes
+
+    - name: distribute configure file
+      template: src=/home/ubuntu/tpl/zoo.cfg dest="{{ unpacked_pkg_path }}/conf"
+
+    - name: check zookeeper data directory {{ zkDataDir }} exists
+      become: yes
+      file:
+        path: "{{ zkDataDir }}"
+        state: directory
+
+    - name: distribute myid file
+      become: yes
+      template: src=/home/ubuntu/tpl/myid dest="{{ zkDataDir }}"
+
+    - name: start zookeeper
+      become: yes
+      shell: "{{ unpacked_pkg_path }}/bin/zkServer.sh restart"
+

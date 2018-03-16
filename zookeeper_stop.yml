@@ -1,0 +1,22 @@
+# e.g. ansible-playbook zookeeper_stop.yml -e "pkg_version=3.4.5"
+---
+- name: stop & uninstall zookeeper
+  hosts: zookeeper
+  user: ubuntu
+  become: yes
+  vars:
+    unpacked_pkg_path: "/home/ubuntu/zookeeper/zookeeper-{{ pkg_version }}"
+    zkDataDir: "/var/lib/zookeeper"
+  tasks:
+    - name: stop zookeeper
+      shell: "{{ unpacked_pkg_path }}/bin/zkServer.sh stop"
+
+    - name: remove unpacked package
+      # shell: "rm -rf {{ unpacked_pkg_path }}"
+      file:
+        path: {{ unpacked_pkg_path }}
+        state: absent
+
+    - name: remove zookeeper data directory
+      file:
+        path: {{ zkDataDir }}
