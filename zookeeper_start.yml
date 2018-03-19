@@ -1,6 +1,6 @@
 # e.g. ansible-playbook zookeeper_start.yml -e "pkg_version=3.4.5 cfg=/home/ubuntu/zoo.cfg"
 ---
-- name: install zookeeper
+- name: install and start zookeeper
   hosts: zookeeper
   user: ubuntu
   vars:

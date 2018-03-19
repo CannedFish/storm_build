@@ -1,0 +1,22 @@
+# e.g. ansible-playbook storm_start.yml -e "pkg_version=1.1.1"
+---
+- name: install and start storm
+  hosts: storm
+  user: ubuntu
+  vars:
+    pkg_path: "/home/ubuntu/storm/apache-storm-{{ pkg_version }}.tar.gz"
+    unpacked_pkg_path: "/home/ubuntu/storm/apache-storm-{{ pkg_version }}"
+    stormLocalDir: "/var/lib/storm"
+  tasks:
+    - name: unpack package
+      unarchive:
+        src: "{{ pkg_path }}"
+        dest: "/home/ubuntu/storm"
+        remote_src: yes
+
+    - name: distribute configure file
+      # template: src=/home/ubuntu/tpl/storm.yaml dest="{{ unpacked_pkg_path }}/conf"
+      template: src=/home/ubuntu/tpl/storm.yaml dest="./"
+      delegate_to: localhost
+      run_once: yes
+
