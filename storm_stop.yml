@@ -1,0 +1,17 @@
+# e.g. ansible-playbook storm_stop.yml -e "pkg_version=1.1.1"
+---
+- name: install and start storm
+  hosts: storm
+  user: ubuntu
+  vars:
+    unpacked_pkg_path: "/home/ubuntu/storm/apache-storm-{{ pkg_version }}"
+  tasks:
+    - name: quit screen session
+      become: yes
+      shell: screen -X -S storm quit
+
+    - name: remove unpacked package
+      file:
+        path: "{{ unpacked_pkg_path }}"
+        state: absent
+

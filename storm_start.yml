@@ -7,6 +7,7 @@
     pkg_path: "/home/ubuntu/storm/apache-storm-{{ pkg_version }}.tar.gz"
     unpacked_pkg_path: "/home/ubuntu/storm/apache-storm-{{ pkg_version }}"
     stormLocalDir: "/var/lib/storm"
+    stormLogDir: "/var/log/storm"
   tasks:
     - name: unpack package
       unarchive:
@@ -15,8 +16,34 @@
         remote_src: yes
 
     - name: distribute configure file
-      # template: src=/home/ubuntu/tpl/storm.yaml dest="{{ unpacked_pkg_path }}/conf"
-      template: src=/home/ubuntu/tpl/storm.yaml dest="./"
-      delegate_to: localhost
-      run_once: yes
+      template: src=/home/ubuntu/tpl/storm.yaml dest="{{ unpacked_pkg_path }}/conf"
+      # template: src=/home/ubuntu/tpl/storm.yaml dest="./"
+      # delegate_to: localhost
+      # run_once: yes
+
+    - name: create screen session
+      become: yes
+      shell: "screen -dmS storm"
+
+    - name: create screen window
+      become: yes
+      command: "screen -S storm -X screen -t {{ item }}"
+      with_items:
+        - "nimbus"
+        - "supervisor"
+        - "ui"
+
+    - name: start nimbus
+      become: yes
+      shell: "screen -S storm -p nimbus -X stuff '{{ unpacked_pkg_path }}/bin/storm nimbus\n'"
+      when: nimbus == "true"
+
+    - name: start supervisor
+      become: yes
+      shell: "screen -S storm -p supervisor -X stuff '{{ unpacked_pkg_path }}/bin/storm supervisor\n'"
+
+    - name: start ui
+      become: yes
+      shell: "screen -S storm -p ui -X stuff '{{ unpacked_pkg_path }}/bin/storm ui\n'"
+      when: nimbus == "true"
 

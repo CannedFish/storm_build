@@ -19,10 +19,10 @@ storm.zookeeper.servers:
 {% for ip in groups['zookeeper'] %}
     - "{{ ip }}"
 {% endfor %}
-# 
-# nimbus.seeds: ["host1", "host2", "host3"]
-# 
-# 
+
+nimbus.seeds: ["{{ groups['storm'][0] }}"]
+
+
 # ##### These may optionally be filled in:
 #    
 ## List of custom serializations
@@ -74,5 +74,13 @@ storm.zookeeper.servers:
 #       - endpoint: "metrics-collector.mycompany.org"
 #
 # storm.cluster.metrics.consumer.publish.interval.secs: 60
-#
+
 storm.local.dir: "{{ stormLocalDir }}"
+
+storm.log.dir: "{{ stormLogDir }}"
+
+supervisor.slots.ports:
+    - 6700
+    - 6701
+    - 6702
+    - 6703

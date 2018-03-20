@@ -14,9 +14,10 @@
     - name: remove unpacked package
       # shell: "rm -rf {{ unpacked_pkg_path }}"
       file:
-        path: {{ unpacked_pkg_path }}
+        path: "{{ unpacked_pkg_path }}"
         state: absent
 
     - name: remove zookeeper data directory
       file:
-        path: {{ zkDataDir }}
+        path: "{{ zkDataDir }}"
+        state: absent
